@@ -173,32 +173,6 @@
     <input id="search">
 </div>
 
-<div id="dlg" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px"
-     closed="true" buttons="#dlg-buttons">
-    <div class="ftitle">用户信息</div>
-    <form id="fm" method="post">
-        <div class="fitem">
-            <label>用户名</label>
-            <input name="userNickname" class="easyui-validatebox" required="true">
-        </div>
-        <div class="fitem">
-            <label>邮箱</label>
-            <input name="email" class="easyui-validatebox" validType="email" required="true">
-        </div>
-        <div class="fitem">
-            <label>密码</label>
-            <input name="password" class="easyui-validatebox" required="true" >
-        </div>
-        <div class="fitem">
-            <label>用户权限</label>
-            <select name="securityControl">
-                <option value ="0">普通用户</option>
-                <option value ="1">社团用户</option>
-                <option value="2">校园用户</option>
-            </select>
-        </div>
-    </form>
-</div>
 <div id="dlg-buttons">
     <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveUser()">保存</a>
     <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">Cancel</a>

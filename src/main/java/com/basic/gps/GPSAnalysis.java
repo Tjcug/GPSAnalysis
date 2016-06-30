@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -31,9 +32,13 @@ public class GPSAnalysis {
         }
     }
 
+    public void resetanalogy() throws FileNotFoundException {
+        InputStream in = new FileInputStream(new File(dataPath));
+        scan=new Scanner(in);
+    }
     public Map scanLine() throws Exception {
         Map map=new HashMap();
-        if(!scan.hasNext()){
+        if(!scan.hasNextLine()){
             return map;
         }
         String data=scan.nextLine();

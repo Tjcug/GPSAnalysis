@@ -26,6 +26,13 @@
 
 
       <div class="col-md-5">
+
+          <div class="btn-group" role="group" aria-label="...">
+              <button id="startanalogy" type="button" class="btn btn-default">开始模拟</button>
+              <button id="pauseanalogy" type="button" class="btn btn-info">暂停模拟</button>
+              <button id="resetanalogy" type="button" class="btn btn-success">重置模拟</button>
+          </div>
+
           <div class="panel panel-warning">
               <div class="panel-heading">GPRMC 基本GNSS信息，推荐定位信息</div>
               <div class="panel-body">
@@ -86,10 +93,28 @@
       </div>
 
       <script type="text/javascript">
+          //给Date对象的prototype属性添加添加更多方法
+          Date.prototype.Format = function (fmt) { //author: meizz
+              var o = {
+                  "M+": this.getMonth() + 1, //月份
+                  "d+": this.getDate(), //日
+                  "h+": this.getHours(), //小时
+                  "m+": this.getMinutes(), //分
+                  "s+": this.getSeconds(), //秒
+                  "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                  "S": this.getMilliseconds() //毫秒
+              };
+              if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+              for (var k in o)
+                  if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+              return fmt;
+          }
+
           $(function(){
               var map = new BMap.Map("container");
               addControlMap(map,"武汉",12);
 
+              /*------------------------------初始化地图元素----------------------------------------------*/
               ajax("/GPRMCList",{},"post",function(data){
                   var points=[];
                   for(var i=0;i<data.length;i++){
@@ -97,17 +122,74 @@
                       var point = new BMap.Point(GPRMC.longitude,GPRMC.latitude);
                       points.push(point);
                   }
-                  //添加线路
-                  var polyline = new BMap.Polyline(points, {strokeColor:"red", strokeWeight:2, strokeOpacity:0.7});   //创建折线
-                  map.addOverlay(polyline);   //增加折线
+                  var wrongline = new BMap.Polyline(points, {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.7});   //创建折线
+                  map.addOverlay(wrongline);   //增加折线
+
+                  //由于百度地图坐标转换API限制，每秒钟只能进行十次坐标转换，所以这里需要进行每次转换十条记录
+                  var total = 0; //总记录数
+                  var groupCount = 0; //每次转十条
+                  if (points.length % 10 > 0) {
+                      groupCount = (points.length / 10) + 1;
+                  }
+                  else {
+                      groupCount = (points.length / 10);
+                  }
+                  var changepoints=[];
+
+                  for(var i=0;i<groupCount;i++) { //外层循环，有多少组十条
+                      var pos = new Array();
+                      for(var j=0;j<10;j++){ //内层循环，每组十条
+                          if(total<points.length){ //不超过总记录数结束
+                              var point = new BMap.Point(points[(i * 10) + j].lng,points[(i * 10) + j].lat);
+                              pos.push(point);
+                          }
+                          total++;
+                      }
+                      //坐标转换完之后的回调函数
+                      var translateCallback = function (data){
+                          if(data.status === 0) {
+                              //添加线路
+                              changepoints.push(data.points);
+                              console.info(changepoints);
+                              var polyline = new BMap.Polyline(data.points, {strokeColor:"red", strokeWeight:2, strokeOpacity:0.7});   //创建折线
+                              map.addOverlay(polyline);   //增加折线
+                          }
+                      }
+                      //进行坐标转换
+                      var convertor = new BMap.Convertor();
+                      convertor.translate(pos, 1, 5, translateCallback);
+                  }
+              });
+              /*------------------------------初始化地图元素----------------------------------------------*/
+
+
+              var timer={};
+              var p = new BMap.Point(116.404, 39.915);
+              var marker = new BMap.Marker(p);  // 创建标注
+              map.addOverlay(marker);               // 将标注添加到地图中
+              marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+
+              $("#startanalogy").click(function(){
+                  timer=setInterval(getData,1000*0.5);
+                  alert("开始模拟");
+              });
+              $("#pauseanalogy").click(function(){
+                  window.clearInterval(timer);
+                  alert("暂停模拟");
+              });
+              $("#resetanalogy").click(function(){
+                  ajax("/resetanalogy",{},"post",function(data){
+                      alert("重置模拟");
+                  });
               });
 
-              var timer=setInterval(getData,1000*1);
+              //获取数据每隔1秒钟调用
               function getData(){
                   console.info("hello");
                   ajax("/scanLine",{},"post",function(data){
                       if(data.gprmc){
                           var gprmc=data.gprmc;
+                          console.info(gprmc);
                           $("#gprmclocationstatus").text(" "+gprmc.locationstatus);
                           $("#gprmcdate").text(" "+gprmc.date);
                           $("#gprmcrate").text(" "+gprmc.rate);
@@ -115,13 +197,30 @@
                           $("#gprmcmodeindication").text(" "+gprmc.modeindication);
                           $("#gprmclatitude").text(" "+gprmc.latitude);
                           $("#gprmclongitude").text(" "+gprmc.longitude);
-                          $("#gprmclongitudearth").text(" "+gpgga.longitudearth);
-                          $("#gprmclatitudearth").text(" "+gpgga.latitudearth);
+                          $("#gprmclongitudearth").text(" "+gprmc.longitudearth);
+                          $("#gprmclatitudearth").text(" "+gprmc.latitudearth);
+                          var point = new BMap.Point(gprmc.longitude,gprmc.latitude);
+                          //坐标转换完之后的回调函数
+                          var translateCallback = function (data){
+                              console.info(data);
+                              if(data.status === 0) {
+                                  console.info(data.points[0]);
+                                  marker.setPosition(data.points[0]);
+                              }
+                          }
+                          //进行坐标转换
+                          setTimeout(function(){
+                              var pointArr = [];
+                              pointArr.push(point);
+                              var convertor = new BMap.Convertor();
+                              convertor.translate(pointArr, 1, 5, translateCallback)
+                          }, 500);
                       }
                       if(data.gpgga){
                           var gpgga=data.gpgga;
                           $("#gpggalocationstatus").text(" "+gpgga.locationstatus);
-                          $("#gpggadate").text(" "+gpgga.date);
+                          var date = new Date(gpgga.date);
+                          $("#gpggadate").text(" "+date.Format("hh:mm:ss"));
                           $("#gpggalatitude").text(" "+gpgga.latitude);
                           $("#gpggalongitude").text(" "+gpgga.longitude);
                           $("#gpggalongitudearth").text(" "+gpgga.longitudearth);

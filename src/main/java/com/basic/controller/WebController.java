@@ -109,4 +109,17 @@ public class WebController extends BaseController {
         }
         return gson.toJson(GPSAnalysis.gprmcList);
     }
+
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/resetanalogy",
+            produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String resetanalogy() throws Exception {
+        gpsAnalysis.resetanalogy();
+        return gson.toJson("success");
+    }
 }

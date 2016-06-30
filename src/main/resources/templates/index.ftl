@@ -84,6 +84,12 @@
                 <li><a  title="/send_analogy_index">模拟GPS整个行程</a></li>
             </ul>
         </div>
+
+        <div title="数据中心" >
+            <ul>
+                <li><a  title="/send_upload_index">上传数据文件</a></li>
+            </ul>
+        </div>
     </div>
 </div>
 

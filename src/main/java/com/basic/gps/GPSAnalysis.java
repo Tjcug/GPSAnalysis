@@ -63,6 +63,10 @@ public class GPSAnalysis {
         return map;
     }
     public void fullScan() throws Exception {
+        gpgsaList=new ArrayList<>();//当前卫星信息
+        gpgsvList=new ArrayList<>();//可见卫星信息
+        gprmcList=new ArrayList<>();//推荐定位信息
+        gpggaList=new ArrayList<>();//GPS定位信息
         InputStream in = new FileInputStream(new File(dataPath));
         Scanner s = new Scanner(in);
         while(s.hasNextLine()){

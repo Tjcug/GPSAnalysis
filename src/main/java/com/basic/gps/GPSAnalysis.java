@@ -274,4 +274,12 @@ public class GPSAnalysis {
         String str2=str.substring(2);
         return Double.valueOf(str1)+Double.valueOf(str2)/60;
     }
+
+    public static String getDataPath() {
+        return dataPath;
+    }
+
+    public static void setDataPath(String dataPath) {
+        GPSAnalysis.dataPath = dataPath;
+    }
 }

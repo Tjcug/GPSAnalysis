@@ -68,6 +68,10 @@
                   <span class="label label-primary">GSV总数</span><label id="gpgsvgsvtotal"></label><br/>
                   <span class="label label-info">GSV编号</span><label id="gpgsvgsvnum"></label><br/>
                   <span class="label label-danger">可见卫星总数</span><label id="gpgsvsatellitetotal"></label><br/>
+                  <span class="label label-success">PRN码（伪随机噪声码）</span><label id="gpgsvprn"></label><br/>
+                  <span class="label label-default">卫星仰角</span><label id="gpgsvte"></label><br/>
+                  <span class="label label-primary">卫星方位角</span><label id="gpgsvazimuth"></label><br/>
+                  <span class="label label-info">信号信噪比</span><label id="gpgsvsnr"></label><br/>
               </div>
           </div>
 
@@ -230,9 +234,24 @@
                       }
                       if(data.gpgsv){
                           var gpgsv=data.gpgsv;
+                          var gpgsvprn="";
+                          var gpgsvte="";
+                          var gpgsvazimuth="";
+                          var gpgsvsnr="";
                           $("#gpgsvgsvtotal").text(" "+gpgsv.gsvtotal);
                           $("#gpgsvgsvnum").text(" "+gpgsv.gsvnum);
                           $("#gpgsvsatellitetotal").text(" "+gpgsv.satellitetotal);
+                          for(var i=0;i<gpgsv.gpgsvSatelliteList.length;i++){
+                              var GPGSVSatellite=gpgsv.gpgsvSatelliteList[i];
+                              gpgsvprn+=GPGSVSatellite.prn+" ";
+                              gpgsvte+=GPGSVSatellite.te+" ";
+                              gpgsvazimuth+=GPGSVSatellite.azimuth+" ";
+                              gpgsvsnr+=GPGSVSatellite.snr+" ";
+                          }
+                          $("#gpgsvprn").text(" "+gpgsvprn);
+                          $("#gpgsvte").text(" "+gpgsvte);
+                          $("#gpgsvazimuth").text(" "+gpgsvazimuth);
+                          $("#gpgsvsnr").text(" "+gpgsvsnr);
                       }
                       if(data.gpgsa){
                           var gpgsa=data.gpgsa;

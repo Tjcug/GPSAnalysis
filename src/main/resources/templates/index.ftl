@@ -87,7 +87,8 @@
 
         <div title="数据中心" >
             <ul>
-                <li><a  title="/send_upload_index">上传数据文件</a></li>
+                <li><a  title="/send_data_upload">上传数据文件</a></li>
+                <li><a  title="/analysisdata">分析数据</a></li>
             </ul>
         </div>
     </div>

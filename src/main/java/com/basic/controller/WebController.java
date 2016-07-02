@@ -6,11 +6,15 @@ import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +41,13 @@ public class WebController extends BaseController {
     @ResponseBody
     public String getGPGSAList(@RequestParam Integer page,
                                @RequestParam Integer rows) throws Exception {
+        Map pageMap=new HashMap<>();
         if(GPSAnalysis.gpgsaList.size()==0){
-            gpsAnalysis.fullScan();
+            pageMap.put("total", GPSAnalysis.gpgsaList.size());
+            pageMap.put("rows", GPSAnalysis.gpgsaList);
+            return gson.toJson(pageMap);
         }
         List list= GPSAnalysis.gpgsaList.subList((page-1)*rows,page*rows);
-        Map pageMap=new HashMap<>();
         pageMap.put("total", GPSAnalysis.gpgsaList.size());
         pageMap.put("rows", list);
         return gson.toJson(pageMap);
@@ -52,10 +58,13 @@ public class WebController extends BaseController {
     @ResponseBody
     public String getGPGSVList(@RequestParam Integer page,
                                @RequestParam Integer rows) throws Exception {
-        if(GPSAnalysis.gpgsvList.size()==0){
-            gpsAnalysis.fullScan();
-        }
         Map pageMap=new HashMap<>();
+        if(GPSAnalysis.gpgsvList.size()==0){
+            pageMap.put("total", GPSAnalysis.gpgsvList.size());
+            pageMap.put("rows",GPSAnalysis.gpgsvList);
+            return gson.toJson(pageMap);
+        }
+
         List list= GPSAnalysis.gpgsvList.subList((page-1)*rows,page*rows);
         pageMap.put("total", GPSAnalysis.gpgsvList.size());
         pageMap.put("rows",list);
@@ -67,11 +76,14 @@ public class WebController extends BaseController {
     @ResponseBody
     public String getGPRMCList(@RequestParam Integer page,
                                @RequestParam Integer rows) throws Exception {
-        if(GPSAnalysis.gprmcList.size()==0){
-            gpsAnalysis.fullScan();
-        }
         Map pageMap=new HashMap<>();
-        List list= GPSAnalysis.gprmcList.subList((page-1)*rows,page*rows);
+        if(GPSAnalysis.gprmcList.size()==0){
+            pageMap.put("total", GPSAnalysis.gprmcList.size());
+            pageMap.put("rows", GPSAnalysis.gprmcList);
+            return gson.toJson(pageMap);
+        }
+
+        List list=new ArrayList(GPSAnalysis.gprmcList.subList((page-1)*rows,page*rows));
         pageMap.put("total", GPSAnalysis.gprmcList.size());
         pageMap.put("rows", list);
         return gson.toJson(pageMap);
@@ -83,10 +95,12 @@ public class WebController extends BaseController {
     public String getGPGGAList(@RequestParam Integer page,
                                @RequestParam Integer rows) throws Exception {
         Gson gson=new GsonBuilder().setDateFormat("HH:mm:ss").create();
-        if(GPSAnalysis.gpggaList.size()==0){
-            gpsAnalysis.fullScan();
-        }
         Map pageMap=new HashMap<>();
+        if(GPSAnalysis.gpggaList.size()==0){
+            pageMap.put("total", GPSAnalysis.gpggaList.size());
+            pageMap.put("rows", GPSAnalysis.gpggaList);
+            return gson.toJson(pageMap);
+        }
         List list= GPSAnalysis.gpggaList.subList((page-1)*rows,page*rows);
         pageMap.put("total", GPSAnalysis.gpggaList.size());
         pageMap.put("rows", list);
@@ -115,11 +129,41 @@ public class WebController extends BaseController {
      * @return
      * @throws Exception
      */
+    @RequestMapping(value = "/fullScan",
+            produces = "application/json;charset=UTF-8")
+    public String fullScan(@RequestParam String filename, Model model)  {
+        File file=new File("data");
+        model.addAttribute("filenames",file.list());
+        try {
+            GPSAnalysis.setDataPath("data/"+filename);
+            gpsAnalysis.fullScan();
+            model.addAttribute("message","数据分析成功");
+        } catch (Exception e) {
+            model.addAttribute("message",e.getMessage());
+            e.printStackTrace();
+        }
+        return "data/analysis";
+    }
+
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/resetanalogy",
             produces = "application/json;charset=UTF-8")
     @ResponseBody
     public String resetanalogy() throws Exception {
         gpsAnalysis.resetanalogy();
         return gson.toJson("success");
+    }
+
+    @RequestMapping(value = "/analysisdata")
+    public ModelAndView analysisdata(){
+        ModelAndView modelAndView=new ModelAndView();
+        modelAndView.setViewName("data/analysis");
+        File file=new File("data");
+        modelAndView.addObject("filenames",file.list());
+        return modelAndView;
     }
 }

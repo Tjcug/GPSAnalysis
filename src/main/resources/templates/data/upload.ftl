@@ -30,7 +30,7 @@
   <form method="POST" enctype="multipart/form-data" action="/uploadFile">
       <h3>选择文件：</h3><br />
       <input id="uploadfile" type="file" name="file" class="file"><br />
-      <#--<input type="submit" class="btn btn-primary" value="Upload"> Press here to upload the file!-->
+      <#--<input type="submit" class="btn btn-primary" value="Upload"> Press here to data the file!-->
   </form>
   <div class="alert alert-warning alert-dismissible" role="alert">
       <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>

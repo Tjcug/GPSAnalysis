@@ -24,7 +24,7 @@ public class UploadController extends BaseController {
             produces = "application/json;charset=UTF-8")
     public ModelAndView uploadFile(@RequestParam("file") MultipartFile file) throws Exception {
         ModelAndView modelAndView=new ModelAndView();
-        modelAndView.setViewName("upload/index");
+        modelAndView.setViewName("data/upload");
         if (!file.isEmpty()) {
             try {
                 byte[] bytes = file.getBytes();
